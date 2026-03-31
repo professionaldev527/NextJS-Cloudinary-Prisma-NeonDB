@@ -53,13 +53,22 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
 
   const handleDownload = useCallback(() => {
     setIsDownloading(true);
-
+    
     const downloadUrl = getCldVideoUrl({
       src: video.publicId,
-      videoCodec: "auto",
       quality: "auto",
       rawTransformations: ["fl_attachment"],
     });
+
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = `${video.title.replace(/\s+/g, "_")}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setIsDownloading(false);
+  }, [video.publicId, video.title]);
 
     const a = document.createElement("a");
     a.href = downloadUrl;
