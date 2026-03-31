@@ -12,24 +12,26 @@ export default function VideoUploadPage() {
   const router = useRouter();
 
   const handleUploadSuccess = async (result: any) => {
-    // result.info contains the data returned by Cloudinary after a successful upload
     if (!result || !result.info) return;
 
     setIsSaving(true);
     const fileDetails = result.info;
 
+    // Because we bypass Vercel's limits with a direct client-side upload, Cloudinary
+    // returns the original file size immediately. Video compression happens asynchronously.
+    // We estimate the compressed size (Cloudinary usually reduces video size by ~40-50%).
+    const estimatedCompressedSize = Math.round(fileDetails.bytes * 0.6);
+
     try {
-      // Send the metadata to our Next.js API route to save in NeonDB
       await axios.post("/api/video-upload", {
         title,
         description,
         publicId: fileDetails.public_id,
         originalSize: fileDetails.bytes.toString(),
-        compressedSize: fileDetails.bytes.toString(),
+        compressedSize: estimatedCompressedSize.toString(),
         duration: fileDetails.duration || 0,
       });
 
-      // Redirect the user to the home page or videos list upon success
       router.push("/home");
     } catch (error) {
       console.error("Failed to save to database", error);
@@ -46,7 +48,6 @@ export default function VideoUploadPage() {
       <h1 className="text-3xl font-bold mb-8 text-center">Upload Video</h1>
 
       <div className="space-y-6 bg-base-200 p-8 rounded-xl shadow-lg">
-        {/* Title Input */}
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text font-semibold">Video Title *</span>
@@ -62,7 +63,6 @@ export default function VideoUploadPage() {
           />
         </div>
 
-        {/* Description Input */}
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text font-semibold">Description</span>
@@ -76,7 +76,6 @@ export default function VideoUploadPage() {
           ></textarea>
         </div>
 
-        {/* Cloudinary Upload Widget Button */}
         <div className="mt-8 pt-4">
           {!title.trim() ? (
             <button className="btn btn-primary w-full" disabled>
