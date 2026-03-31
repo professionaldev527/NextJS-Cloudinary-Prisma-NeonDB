@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { CldImage } from "next-cloudinary";
+import { CldImage, CldUploadWidget } from "next-cloudinary";
 
 const socialFormats = {
   "Instagram Square (1:1)": { width: 1080, height: 1080, aspectRatio: "1:1" },
@@ -18,7 +18,6 @@ export default function SocialShare() {
   const [selectedFormat, setSelectedFormat] = useState<SocialFormat>(
     "Instagram Square (1:1)",
   );
-  const [isUploading, setIsUploading] = useState(false);
   const [isTransforming, setIsTransforming] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -28,30 +27,10 @@ export default function SocialShare() {
     }
   }, [selectedFormat, uploadedImage]);
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("/api/image-upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Failed to upload image");
-
-      const data = await response.json();
-      setUploadedImage(data.publicId);
-    } catch (error) {
-      console.log(error);
-      alert("Failed to upload image");
-    } finally {
-      setIsUploading(false);
+  // Handle the successful direct upload from Cloudinary widget
+  const handleUploadSuccess = (result: any) => {
+    if (result.info && result.info.public_id) {
+      setUploadedImage(result.info.public_id);
     }
   };
 
@@ -84,21 +63,28 @@ export default function SocialShare() {
         <div className="card-body">
           <h2 className="card-title mb-4">Upload an Image</h2>
           <div className="form-control">
-            <label className="label">
-              <span className="label-text">Choose an image file</span>
-            </label>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              className="file-input file-input-bordered file-input-primary w-full"
-            />
+            {/* Direct Cloudinary Upload Widget */}
+            <CldUploadWidget
+              uploadPreset="next_app_preset" // Reusing the same preset!
+              onSuccess={handleUploadSuccess}
+              options={{
+                maxFiles: 1,
+                resourceType: "image",
+                clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+              }}
+            >
+              {({ open }) => {
+                return (
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() => open()}
+                  >
+                    Click to Upload Image
+                  </button>
+                );
+              }}
+            </CldUploadWidget>
           </div>
-
-          {isUploading && (
-            <div className="mt-4">
-              <progress className="progress progress-primary w-full"></progress>
-            </div>
-          )}
 
           {uploadedImage && (
             <div className="mt-6">
