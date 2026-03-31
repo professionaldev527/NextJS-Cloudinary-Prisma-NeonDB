@@ -1,98 +1,117 @@
-"use client"
-import React, {useState} from 'react'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
+"use client";
 
-function VideoUpload() {
-    const [file, setFile] = useState<File | null>(null)
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [isUploading, setIsUploading] = useState(false)
+import React, { useState } from "react";
+import { CldUploadWidget } from "next-cloudinary";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-    const router = useRouter()
-    //max file size of 60 mb
+export default function VideoUploadPage() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
-    const MAX_FILE_SIZE = 70 * 1024 * 1024
+  const handleUploadSuccess = async (result: any) => {
+    // result.info contains the data returned by Cloudinary after a successful upload
+    if (!result || !result.info) return;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!file) return;
+    setIsSaving(true);
+    const fileDetails = result.info;
 
-        if (file.size > MAX_FILE_SIZE) {
-            //TODO: add notification
-            alert("File size too large")
-            return;
-        }
+    try {
+      // Send the metadata to our Next.js API route to save in NeonDB
+      await axios.post("/api/video-upload", {
+        title,
+        description,
+        publicId: fileDetails.public_id,
+        originalSize: fileDetails.bytes.toString(),
+        compressedSize: fileDetails.bytes.toString(),
+        duration: fileDetails.duration || 0,
+      });
 
-        setIsUploading(true)
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("originalSize", file.size.toString());
-
-        try {
-            const response = await axios.post("/api/video-upload", formData)
-            // check for 200 response
-            router.push("/")
-        } catch (error) {
-            console.log(error)
-            // notification for failure
-        } finally{
-            setIsUploading(false)
-        }
-
-    }
-
-
-    return (
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-bold mb-4">Upload Video</h1>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="label">
-                <span className="label-text">Title</span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Description</span>
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="textarea textarea-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Video File</span>
-              </label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="file-input file-input-bordered w-full"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={isUploading}
-            >
-              {isUploading ? "Uploading..." : "Upload Video"}
-            </button>
-          </form>
-        </div>
+      // Redirect the user to the home page or videos list upon success
+      router.push("/home");
+    } catch (error) {
+      console.error("Failed to save to database", error);
+      alert(
+        "Upload succeeded, but failed to save video details to the database.",
       );
-}
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-export default VideoUpload
+  return (
+    <div className="container mx-auto p-8 max-w-2xl">
+      <h1 className="text-3xl font-bold mb-8 text-center">Upload Video</h1>
+
+      <div className="space-y-6 bg-base-200 p-8 rounded-xl shadow-lg">
+        {/* Title Input */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-semibold">Video Title *</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Enter title"
+            className="input input-bordered w-full"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={isSaving}
+            required
+          />
+        </div>
+
+        {/* Description Input */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-semibold">Description</span>
+          </label>
+          <textarea
+            className="textarea textarea-bordered h-24 w-full"
+            placeholder="Enter description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={isSaving}
+          ></textarea>
+        </div>
+
+        {/* Cloudinary Upload Widget Button */}
+        <div className="mt-8 pt-4">
+          {!title.trim() ? (
+            <button className="btn btn-primary w-full" disabled>
+              Enter a title to enable upload
+            </button>
+          ) : (
+            <CldUploadWidget
+              uploadPreset="next_app_preset"
+              onSuccess={handleUploadSuccess}
+              options={{
+                resourceType: "video",
+                maxFiles: 1,
+                folder: "video-uploads",
+                clientAllowedFormats: ["mp4", "webm", "mov", "avi"],
+              }}
+            >
+              {({ open }) => {
+                return (
+                  <button
+                    className="btn btn-primary w-full"
+                    onClick={() => open()}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <span className="loading loading-spinner">Saving...</span>
+                    ) : (
+                      "Select & Upload Video"
+                    )}
+                  </button>
+                );
+              }}
+            </CldUploadWidget>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
