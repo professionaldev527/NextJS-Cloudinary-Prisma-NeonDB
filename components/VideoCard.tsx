@@ -53,7 +53,7 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
 
   const handleDownload = useCallback(() => {
     setIsDownloading(true);
-    
+
     const downloadUrl = getCldVideoUrl({
       src: video.publicId,
       quality: "auto",
@@ -70,18 +70,7 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
     setIsDownloading(false);
   }, [video.publicId, video.title]);
 
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = `${video.title.replace(/\s+/g, "_")}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    setIsDownloading(false);
-  }, [video.publicId, video.title]);
-
   const handleDeleteClick = async () => {
-    // Show a confirmation dialog before deleting
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this video?",
     );
@@ -97,7 +86,6 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
         throw new Error("Failed to delete video");
       }
 
-      // Notify parent component to remove this video from UI
       if (onDelete) {
         onDelete(video.id);
       }
@@ -214,7 +202,6 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
           </span>
 
           <div className="flex items-center gap-2">
-            {/* Delete Button */}
             <button
               className="btn btn-sm btn-error btn-outline"
               onClick={handleDeleteClick}
@@ -244,7 +231,6 @@ export default function VideoCard({ video, onDelete }: VideoCardProps) {
               )}
             </button>
 
-            {/* Download Button */}
             <button
               className="btn btn-sm btn-primary"
               onClick={handleDownload}
