@@ -1,32 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
+// PREVENT NEXT.JS FROM CACHING THIS ROUTE AT BUILD TIME
+export const dynamic = "force-dynamic";
+
 const prisma = new PrismaClient();
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest) {
   try {
-    const id = params.id;
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "Video ID is required" },
-        { status: 400 },
-      );
-    }
-
-    // Delete the record from Neon database
-    await prisma.video.delete({
-      where: { id: id },
+    const videos = await prisma.video.findMany({
+      orderBy: { createdAt: "desc" },
     });
-
-    return NextResponse.json({ message: "Video deleted successfully" });
+    return NextResponse.json(videos);
   } catch (error) {
-    console.error("Error deleting video:", error);
     return NextResponse.json(
-      { error: "Failed to delete video" },
+      { error: "Error fetching videos" },
       { status: 500 },
     );
   } finally {
