@@ -36,5 +36,5 @@ Before you begin, ensure you have the following installed and set up:
 ### 1. Clone the repository
 
 ```bash
-git clone [https://github.com/yourusername/cloudinary-saas.git](https://github.com/yourusername/cloudinary-saas.git)
+git clone https://github.com/yourusername/cloudinary-saas.git
 cd cloudinary-saas
