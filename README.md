@@ -92,6 +92,5 @@ Before you begin, ensure you have the following installed and set up:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/cloudinary-saas.git
-cd cloudinary-saas
->>>>>>> ac320e4fca35e047aecc66f68624a3f85fb5a4e3
+git clone https://github.com/professionaldev527/NextJS-Cloudinary-Prisma-NeonDB.git
+cd /NextJS-Cloudinary-Prisma-NeonDB.git
