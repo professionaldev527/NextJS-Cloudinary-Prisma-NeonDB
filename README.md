@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Cloudinary SaaS - Video Processor
 
 A powerful Next.js application for video management, automatic compression, playback, and social media asset generation.
