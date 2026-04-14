@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
 // PREVENT NEXT.JS FROM CACHING THIS ROUTE AT BUILD TIME
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +19,5 @@ export async function GET(request: NextRequest) {
       { error: "Error fetching videos", details: error.message },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

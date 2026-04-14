@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
-
-const prisma = new PrismaClient();
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -61,7 +59,5 @@ export async function DELETE(
       { error: "Failed to delete video", details: error.message },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

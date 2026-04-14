@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
+  let body;
   try {
     // Parse the JSON body sent from the frontend
-    const body = await request.json();
+    body = await request.json();
     const {
       title,
       description,
@@ -53,7 +52,5 @@ export async function POST(request: NextRequest) {
       { error: "Failed to save video record to database", details: error.message },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
