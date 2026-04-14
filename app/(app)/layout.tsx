@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser, UserButton } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import {
   LogOutIcon,
   MenuIcon,
@@ -67,34 +68,26 @@ export default function AppLayout({
               </Link>
             </div>
             <div className="flex-none flex items-center space-x-4">
-              {user && (
-                <>
-                  <div className="avatar">
-                    <div className="w-8 h-8 rounded-full">
-                      <img
-                        src={user.imageUrl}
-                        alt={
-                          user.username || user.emailAddresses[0].emailAddress
-                        }
-                      />
-                    </div>
-                  </div>
-                  <span className="text-sm truncate max-w-xs lg:max-w-md">
-                    {user.username || user.emailAddresses[0].emailAddress}
-                  </span>
-                  <button
-                    onClick={handleSignOut}
-                    className="btn btn-ghost btn-circle"
-                  >
-                    <LogOutIcon className="h-6 w-6" />
-                  </button>
-                </>
-              )}
+              <button
+                onClick={() => signOut({ redirectUrl: "/sign-in" })}
+                className="btn btn-error btn-md font-bold shadow-lg transition-all hover:scale-105"
+              >
+                <LogOutIcon className="mr-2 h-5 w-5" />
+                Sign Out
+              </button>
+              <div className="avatar">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    baseTheme: dark,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </header>
         {/* Page content */}
-        <main className="flex-grow">
+        <main className="flex-grow bg-base-300">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 my-8">
             {children}
           </div>
@@ -124,17 +117,6 @@ export default function AppLayout({
               </li>
             ))}
           </ul>
-          {user && (
-            <div className="p-4">
-              <button
-                onClick={handleSignOut}
-                className="btn btn-outline btn-error w-full"
-              >
-                <LogOutIcon className="mr-2 h-5 w-5" />
-                Sign Out
-              </button>
-            </div>
-          )}
         </aside>
       </div>
     </div>

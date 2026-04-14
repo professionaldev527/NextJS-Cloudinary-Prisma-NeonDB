@@ -15,9 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignInUrl="/home"
+      afterSignUpUrl="/home"
+    >
 
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <body className={inter.className}>{children}</body>
     </html>
     </ClerkProvider>

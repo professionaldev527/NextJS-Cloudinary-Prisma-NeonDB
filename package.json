@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.2.12",
+    "@clerk/themes": "^2.4.57",
     "@prisma/client": "^5.22.0",
     "axios": "^1.7.3",
     "cloudinary": "^2.4.0",
@@ -19,7 +20,8 @@
     "next": "14.2.5",
     "next-cloudinary": "^6.9.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.14",

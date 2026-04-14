@@ -43,10 +43,14 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(video);
-  } catch (error) {
-    console.error("Database save failed:", error);
+  } catch (error: any) {
+    console.error("[VIDEO_UPLOAD_ERROR] Detailed failure:", {
+      message: error.message,
+      stack: error.stack,
+      body: body
+    });
     return NextResponse.json(
-      { error: "Failed to save video record to database" },
+      { error: "Failed to save video record to database", details: error.message },
       { status: 500 },
     );
   } finally {
